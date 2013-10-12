@@ -15,56 +15,56 @@ def update_or_pass(w, x, y, longn=1):
         return list(w[j] + longn*y*x[j] for j in temp)
 
 
-def getd(path):
+def get_d(path):
     d = len(open(path).readline().split())
     return d
 
 
-def getn(path):
+def get_n(path):
     fin_preload = open(path)
     n = sum(1 for line in fin_preload)  # number of data
     fin_preload.close()
     return n
 
 
-def xylist(path):
-    d = getd(path)
+def get_list_xy(path):
+    d = get_d(path)
     fin = open(path)
-    listx, listy = [], []
+    list_x, list_y = [], []
     for line in fin:
         temp = line.split()
-        templist = []
+        temp_list = []
         for i in range(d - 1):
-            templist.append(float(temp[i]))
-        listx.append([1] + templist)
-        listy.append(int(temp[d - 1]))
+            temp_list.append(float(temp[i]))
+        list_x.append([1] + temp_list)
+        list_y.append(int(temp[d - 1]))
     fin.close()
-    return (listx, listy)
+    return (list_x, list_y)
 
 
-def readxy(i, listxy):
-    (listx, listy) = listxy
-    return (listx[i], listy[i])
+def read_xy(i, list_xy):
+    (list_x, list_y) = list_xy
+    return (list_x[i], list_y[i])
 
 
-def nextxy(i, listxy, readlist=None):
+def next_xy(i, list_xy, readlist=None):
     if readlist == None:
-        return readxy(i, listxy)
+        return read_xy(i, list_xy)
     else:
-        return readxy(readlist[i], listxy)
+        return read_xy(readlist[i], list_xy)
 
 
-def nextxy_pure_random(randomlist, listxy):
+def nextxy_random(randomlist, list_xy):
     seed()
     shuffle(randomlist)
-    return readxy(randomlist[-1], listxy)
+    return read_xy(randomlist[-1], list_xy)
 
 
-def errorset(w, listxy):
-    n = len(listxy[1])
+def get_errorset(w, list_xy):
+    n = len(list_xy[1])
     errorlist = []
     for i in range(n):
-        (x, y) = readxy(i, listxy)
+        (x, y) = read_xy(i, list_xy)
         temp = update_or_pass(w, x, y)
         if temp != -1:
             errorlist.append(i)
@@ -72,15 +72,15 @@ def errorset(w, listxy):
 
 
 def pla_core(path, longn=1, readlist=None):
-    n = getn(path)
-    d = getd(path)
-    listxy = xylist(path)
+    n = get_n(path)
+    d = get_d(path)
+    list_xy = get_list_xy(path)
     w = [0] * d  # w0
     count = 0  # number of updates
     s = 0  # number of continuous passes
     loop = 0  # number of loops
     while True:
-        (x, y) = nextxy(loop % n, listxy, readlist)
+        (x, y) = next_xy(loop % n, list_xy, readlist)
         t = update_or_pass(w, x, y, longn)
         loop += 1
         if t == -1:
@@ -95,22 +95,22 @@ def pla_core(path, longn=1, readlist=None):
 
 
 def pla_random_core(path, pla_updates):
-    n = getn(path)
-    d = getd(path)
-    listxy = xylist(path)
+    n = get_n(path)
+    d = get_d(path)
+    list_xy = get_list_xy(path)
     w = [0] * d
     count = 0
     w_pocket = w
     errornumber_pocket = n
     while count < pla_updates:
-        errorlist = errorset(w, listxy)
+        errorlist = get_errorset(w, listxy)
         errornumber = len(errorlist)
         if  errornumber < errornumber_pocket:
             errornumber_pocket = errornumber
             w_pocket = w
             if errornumber_pocket == 0:
                 break
-        (x, y) = nextxy_pure_random(errorlist, listxy)
+        (x, y) = nextxy_random(errorlist, list_xy)
         w = update_or_pass(w, x, y)
         count += 1
     return (w_pocket, count)
@@ -122,41 +122,41 @@ def pla_fixed_sequential(path):
 
 
 def pla_fixed_random(path, times=2000, longn=0.5):
-    n = getn(path)
+    n = get_n(path)
     readlist = list(range(n))
-    sumofcounts = 0
+    sum_of_counts = 0
     for i in range(times):
         seed()
         shuffle(readlist)
         (w, count) = pla_core(path, longn, readlist)
-        sumofcounts += count
-    return sumofcounts / times
+        sum_of_counts += count
+    return sum_of_counts / times
 
 
 def pla_pure_random(path, pla_updates=50):
     return pla_random_core(path, pla_updates)
 
 
-def test(listxy, w):
-    n = len(listxy[1])
+def test(list_xy, w):
+    n = len(list_xy[1])
     error_count = 0
     for i in range(n):
-        (x, y) = readxy(i, listxy)
+        (x, y) = read_xy(i, list_xy)
         if update_or_pass(w, x, y) != -1:
             error_count += 1
     return error_count / n
 
 
-def verify(trainpath, testpath, times):
-    listxy = xylist(testpath)
+def verify(train_path, test_path, times):
+    list_xy = get_list_xy(test_path)
     sum_of_error_rate = 0
     for i in range(times):
         (w_pocket, temp) = pla_pure_random(trainpath)
-        sum_of_error_rate += test(listxy, w_pocket)
+        sum_of_error_rate += test(list_xy, w_pocket)
     return sum_of_error_rate / times
 
 
-traindata = 'hw1_18_train.dat'
-testdata = 'hw1_18_test.dat'
-aer = verify(traindata, testdata, 200)
-print('average error rate = ' + str(aer * 100) + '%')
+train_data = 'hw1_18_train.dat'
+test_data = 'hw1_18_test.dat'
+average_errror_rate = verify(train_data, test_data, 200)
+print('average error rate = ' + str(average_error_rate * 100) + '%')
