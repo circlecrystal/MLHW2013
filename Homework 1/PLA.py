@@ -12,7 +12,7 @@ def update_or_pass(w, x, y, longn=1):
     if s * y > 0:
         return -1
     else:
-        return list(w[j] + longn*y*x[j] for j in temp)
+        return [w[j] + longn*y*x[j] for j in temp]
 
 
 def get_d(path):
@@ -103,7 +103,7 @@ def pla_random_core(path, pla_updates):
     w_pocket = w
     errornumber_pocket = n
     while count < pla_updates:
-        errorlist = get_errorset(w, listxy)
+        errorlist = get_errorset(w, list_xy)
         errornumber = len(errorlist)
         if  errornumber < errornumber_pocket:
             errornumber_pocket = errornumber
@@ -113,7 +113,7 @@ def pla_random_core(path, pla_updates):
         (x, y) = nextxy_random(errorlist, list_xy)
         w = update_or_pass(w, x, y)
         count += 1
-    return (w_pocket, count)
+    return (w_pocket, w)
 
 
 def pla_fixed_sequential(path):
@@ -121,7 +121,7 @@ def pla_fixed_sequential(path):
     return count
 
 
-def pla_fixed_random(path, times=2000, longn=0.5):
+def pla_fixed_random(path, longn=1, times=2000):
     n = get_n(path)
     readlist = list(range(n))
     sum_of_counts = 0
@@ -147,16 +147,41 @@ def test(list_xy, w):
     return error_count / n
 
 
-def verify(train_path, test_path, times):
+def verify(
+        train_path, test_path, pla_updates=50, times=2000, verify_pocket=True):
     list_xy = get_list_xy(test_path)
     sum_of_error_rate = 0
     for i in range(times):
-        (w_pocket, temp) = pla_pure_random(trainpath)
-        sum_of_error_rate += test(list_xy, w_pocket)
+        (w_pocket, w) = pla_pure_random(train_path, pla_updates)
+        if verify_pocket==True:
+            sum_of_error_rate += test(list_xy, w_pocket)
+        else:
+            sum_of_error_rate += test(list_xy, w)
     return sum_of_error_rate / times
 
 
-train_data = 'hw1_18_train.dat'
-test_data = 'hw1_18_test.dat'
-average_errror_rate = verify(train_data, test_data, 200)
-print('average error rate = ' + str(average_error_rate * 100) + '%')
+train_data1 = 'hw1_15_train.dat'
+train_data2 = 'hw1_18_train.dat'
+test_data2 = 'hw1_18_test.dat'
+
+
+# print('Problem 15: ', end='')
+# print(pla_fixed_sequential(train_data1))
+
+# print('Problem 16: ', end='')
+# print(pla_fixed_random(train_data1))
+
+# print('Problem 17: ', end='')
+# print(pla_fixed_random(train_data1, 0.5))
+
+# print('Problem 18: ', end='')
+# average_error_rate = verify(train_data2, test_data2)
+# print('average error rate = ' + str(average_error_rate * 100) + '%')
+
+# print('Problem 19: ', end='')
+# average_error_rate = verify(train_data2, test_data2, 50, 2000, False)
+# print('average error rate = ' + str(average_error_rate * 100) + '%')
+
+# print('Problem 20: ', end='')
+# average_error_rate = verify(train_data2, test_data2, 100, 2000, True)
+# print('average error rate = ' + str(average_error_rate * 100) + '%')
