@@ -148,7 +148,11 @@ def test(list_xy, w):
 
 
 def verify(
-        train_path, test_path, pla_updates=50, times=2000, verify_pocket=True):
+            train_path,
+            test_path,
+            pla_updates=50,
+            times=2000,
+            verify_pocket=True):
     list_xy = get_list_xy(test_path)
     sum_of_error_rate = 0
     for i in range(times):
